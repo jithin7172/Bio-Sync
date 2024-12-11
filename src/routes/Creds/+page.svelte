@@ -105,33 +105,34 @@
             </div>
 
             <!-- Content -->
-            <div
-                class="relative z-30 flex flex-col justify-center items-center h-full p-4 lg:p-8"
-                in:fly={{ y: 20, duration: 800, delay: 300 }}
-            >
-                <div class="max-w-2xl mx-auto space-y-4 lg:space-y-6">
-                    <h1
-                        class="text-white/80 text-xl lg:text-2xl text-center hero-text font-[SH AD Grotesk]"
-                        in:fly={{ y: 20, duration: 800, delay: 500 }}
-                    >
-                        Know your health,<br /> monitor your life
-                    </h1>
-                    <div
-                        class="flex justify-between items-center w-full max-w-xl mx-auto mb-8 lg:mb-16 space-x-4 lg:space-x-6"
-                        in:fly={{ y: 20, duration: 800, delay: 700 }}
-                    >
-                        <span class="text-white/80 w-24 lg:w-56 text-lg lg:text-2xl hero-text text-right font-sh-grotesk">
-                            Real-time monitoring
-                        </span>
-                        <div class="text-[40px] lg:text-[80px] text-white m-0 font-bold animate-pulse">
-                            桜
-                        </div>
-                        <span class="text-white/80 w-24 lg:w-56 text-lg lg:text-2xl hero-text text-left font-sh-grotesk">
-                            Personalized insights
-                        </span>
-                    </div>
-                </div>
-            </div>
+                       <!-- Content -->
+                       <div
+                       class="relative z-30 flex flex-col justify-center items-center h-full p-4 lg:p-8"
+                       in:fly={{ y: 20, duration: 800, delay: 300 }}
+                   >
+                       <div class="max-w-2xl mx-auto space-y-4 lg:space-y-6">
+                           <h1
+                               class="text-white/80 text-xl lg:text-2xl text-center hero-text font-[SH AD Grotesk]"
+                               in:fly={{ y: 20, duration: 800, delay: 500 }}
+                           >
+                               Know your health,<br /> monitor your life
+                           </h1>
+                           <div
+                               class="flex justify-between items-center w-full max-w-xl mx-auto mb-8 lg:mb-16 space-x-4 lg:space-x-6"
+                               in:fly={{ y: 20, duration: 800, delay: 700 }}
+                           >
+                               <span class="text-white/80 w-24 lg:w-56 text-lg lg:text-2xl hero-text text-right font-sh-grotesk">
+                                   Real-time monitoring
+                               </span>
+                               <div class="text-[40px] lg:text-[80px] text-white m-0 font-bold animate-pulse">
+                                   桜
+                               </div>
+                               <span class="text-white/80 w-24 lg:w-56 text-lg lg:text-2xl hero-text text-left font-sh-grotesk">
+                                   Personalized insights
+                               </span>
+                           </div>
+                       </div>
+                   </div>
         </div>
 
         <!-- Right Side - Login Form -->
@@ -142,10 +143,10 @@
             <div class="w-full max-w-md space-y-6 lg:space-y-8 min-w-[280px] px-4">
                 <div class="text-center" in:fly={{ y: 20, duration: 800, delay: 200 }}>
                     <h2 class="text-xl lg:text-2xl font-semibold text-gray-900 dark:text-white">
-                        Login to BioSync
+                        User Details
                     </h2>
                     <p class="mt-2 text-sm lg:text-base text-gray-600 dark:text-gray-400">
-                        You can login or sign up here with multiple different client options
+                        Please enter your credentials
                     </p>
                 </div>
 
@@ -172,31 +173,101 @@
                     </div>
 
                     <!-- Email Form -->
-                    <!-- Email Form -->
-<form class="space-y-4 lg:space-y-6" on:submit|preventDefault={() => goto('/Creds')}>
+                    <!-- ... existing code ... -->
+
+<!-- Form -->
+<form class="space-y-4 lg:space-y-6" method="POST" action="?/submit">
     <div>
-        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Email
+        <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Username
         </label>
         <input
-            type="email"
-            id="email"
-            name="email"
+            type="text"
+            id="username"
+            name="username"
             class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 dark:bg-[#0E0E0C] dark:border dark:border-gray-600 dark:text-white dark:focus:ring-gray-500"
-            placeholder="Enter your email"
+            placeholder="Enter your username"
+            required
         />
     </div>
 
     <div>
-        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Password
+        <label for="age" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Age
         </label>
         <input
-            type="password"
-            id="password"
-            name="password"
+            type="number"
+            id="age"
+            name="age"
+            min="0"
+            max="120"
             class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 dark:bg-[#0E0E0C] dark:border dark:border-gray-600 dark:text-white dark:focus:ring-gray-500"
-            placeholder="Enter your password"
+            placeholder="Enter your age"
+            required
+        />
+    </div>
+
+    <div>
+        <label for="gender" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Gender
+        </label>
+        <select
+            id="gender"
+            name="gender"
+            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 dark:bg-[#0E0E0C] dark:border dark:border-gray-600 dark:text-white dark:focus:ring-gray-500"
+            required
+        >
+            <option value="">Select gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="weight" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Weight (kg)
+        </label>
+        <input
+            type="number"
+            step="0.1"
+            id="weight"
+            name="weight"
+            min="0"
+            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 dark:bg-[#0E0E0C] dark:border dark:border-gray-600 dark:text-white dark:focus:ring-gray-500"
+            placeholder="Enter your weight"
+            required
+        />
+    </div>
+
+    <div>
+        <label for="height" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Height (cm)
+        </label>
+        <input
+            type="number"
+            id="height"
+            name="height"
+            min="0"
+            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 dark:bg-[#0E0E0C] dark:border dark:border-gray-600 dark:text-white dark:focus:ring-gray-500"
+            placeholder="Enter your height"
+            required
+        />
+    </div>
+
+    <div>
+        <label for="impedance" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Impedance
+        </label>
+        <input
+            type="number"
+            step="0.1"
+            id="impedance"
+            name="impedance"
+            min="0"
+            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 dark:bg-[#0E0E0C] dark:border dark:border-gray-600 dark:text-white dark:focus:ring-gray-500"
+            placeholder="Enter impedance value"
+            required
         />
     </div>
 
@@ -204,9 +275,11 @@
         type="submit"
         class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-300 dark:bg-white dark:text-black dark:hover:bg-gray-200"
     >
-        Login
+        Submit
     </button>
 </form>
+
+<!-- ... rest of the existing code ... -->
                     <div class="text-center pt-2">
                         <p class="text-sm text-gray-600 dark:text-gray-400">
                             Don't have an account?{' '}
