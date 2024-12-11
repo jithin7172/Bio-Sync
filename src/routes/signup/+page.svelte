@@ -3,6 +3,15 @@
     import { page } from "$app/stores";
     import { fade, fly } from "svelte/transition";
     import { goto } from "$app/navigation";
+    import {
+        getAuth,
+        createUserWithEmailAndPassword,
+        GoogleAuthProvider,
+        signInWithPopup,
+    } from "firebase/auth";
+    import { getFirestore, doc, setDoc } from 'firebase/firestore';
+    import { auth } from "../../stores/auth";
+
     const googleAuthUrl = $page.data.authUrl;
 
     // Initialize isDark based on localStorage or system preference
@@ -27,6 +36,10 @@
         "/images/15.jpg"
     ];
 
+    let email: string = '';
+    let password: string = '';
+    let errorMessage: string = '';
+
     function toggleTheme() {
         isDark = !isDark;
         updateTheme(isDark);
@@ -43,7 +56,7 @@
     }
 
     function handleSignupRedirect() {
-        goto('/signup');
+        goto('/login');
     }
 
     function handleMouseMove(event: MouseEvent) {
@@ -56,6 +69,55 @@
     function switchImage() {
         initialLoad = false;
         currentImageIndex = (currentImageIndex + 1) % backgroundImages.length;
+    }
+
+    async function handleSubmit(event: Event) {
+        event.preventDefault();
+        const auth = getAuth();
+
+        try {
+            // Create user with email and password
+            const credential = await createUserWithEmailAndPassword(auth, email, password);
+            
+            // Create user document in Firestore
+            if (credential.user.email) {
+                const db = getFirestore();
+                const userDocRef = doc(db, 'userdata', credential.user.email);
+                await setDoc(userDocRef, {
+                    email: credential.user.email,
+                    createdAt: new Date(),
+                    // Add any other user data fields you want to store
+                });
+            }
+
+            // Redirect to home page after successful signup
+            goto('/');
+        } catch (error: any) {
+            errorMessage = error.message;
+        }
+    }
+
+    async function handleGoogleSignUp() {
+        try {
+            const auth = getAuth();
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup(auth, provider);
+            
+            // Create user document in Firestore
+            if (result.user.email) {
+                const db = getFirestore();
+                const userDocRef = doc(db, 'userdata', result.user.email);
+                await setDoc(userDocRef, {
+                    email: result.user.email,
+                    createdAt: new Date(),
+                    // Add any other user data fields you want to store
+                });
+            }
+
+            goto("/");
+        } catch (error: any) {
+            errorMessage = error.message;
+        }
     }
 
     onMount(() => {
@@ -151,14 +213,15 @@
 
                 <div class="space-y-4" in:fly={{ y: 20, duration: 800, delay: 400 }}>
                     <!-- Social Logins -->
-                    <a href={googleAuthUrl}>
-                        <button class="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 p-2.5 lg:p-3 rounded-lg transition-all duration-300 shadow-sm dark:bg-[#0E0E0C] dark:border dark:border-gray-600 dark:hover:bg-gray-700 dark:text-white text-sm lg:text-base">
-                            <span class="flex items-center justify-center gap-3">
-                                <img src="/icons/google.svg" alt="Google" class="w-5 h-5 dark:invert" />
-                                Login with Google
-                            </span>
-                        </button>
-                    </a>
+                    <button
+                        on:click={handleGoogleSignUp}
+                        class="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 p-2.5 lg:p-3 rounded-lg transition-all duration-300 shadow-sm dark:bg-[#0E0E0C] dark:border dark:border-gray-600 dark:hover:bg-gray-700 dark:text-white text-sm lg:text-base"
+                    >
+                        <span class="flex items-center justify-center gap-3">
+                            <img src="/icons/google.svg" alt="Google" class="w-5 h-5 dark:invert" />
+                            Sign up with Google
+                        </span>
+                    </button>
 
                     <div class="relative py-2 lg:py-4">
                         <div class="absolute inset-0 flex items-center">
@@ -172,49 +235,56 @@
                     </div>
 
                     <!-- Email Form -->
-                    <!-- Email Form -->
-<form class="space-y-4 lg:space-y-6" on:submit|preventDefault={() => goto('/Creds')}>
-    <div>
-        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Email
-        </label>
-        <input
-            type="email"
-            id="email"
-            name="email"
-            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 dark:bg-[#0E0E0C] dark:border dark:border-gray-600 dark:text-white dark:focus:ring-gray-500"
-            placeholder="Enter your email"
-        />
-    </div>
+                    <form class="space-y-4 lg:space-y-6" on:submit={handleSubmit}>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Email
+                            </label>
+                            <input
+                                bind:value={email}
+                                type="email"
+                                id="email"
+                                name="email"
+                                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 dark:bg-[#0E0E0C] dark:border dark:border-gray-600 dark:text-white dark:focus:ring-gray-500"
+                                placeholder="Enter your email"
+                                required
+                            />
+                        </div>
 
-    <div>
-        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Password
-        </label>
-        <input
-            type="password"
-            id="password"
-            name="password"
-            class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 dark:bg-[#0E0E0C] dark:border dark:border-gray-600 dark:text-white dark:focus:ring-gray-500"
-            placeholder="Enter your password"
-        />
-    </div>
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Password
+                            </label>
+                            <input
+                                bind:value={password}
+                                type="password"
+                                id="password"
+                                name="password"
+                                class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 dark:bg-[#0E0E0C] dark:border dark:border-gray-600 dark:text-white dark:focus:ring-gray-500"
+                                placeholder="Enter your password"
+                                required
+                            />
+                        </div>
 
-    <button
-        type="submit"
-        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-300 dark:bg-white dark:text-black dark:hover:bg-gray-200"
-    >
-        Login
-    </button>
-</form>
+                        {#if errorMessage}
+                            <div class="text-red-500 text-sm">{errorMessage}</div>
+                        {/if}
+
+                        <button
+                            type="submit"
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-300 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                        >
+                            Sign Up
+                        </button>
+                    </form>
                     <div class="text-center pt-2">
                         <p class="text-sm text-gray-600 dark:text-gray-400">
-                            Don't have an account?{' '}
+                           You have an account?{' '}
                             <button
                                 on:click={handleSignupRedirect}
                                 class="text-black dark:text-white hover:underline font-medium"
                             >
-                                Sign up
+                                login
                             </button>
                         </p>
                     </div>
