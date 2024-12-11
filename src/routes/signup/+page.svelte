@@ -114,7 +114,7 @@
                 });
             }
 
-            goto("/");
+            goto("/Creds");
         } catch (error: any) {
             errorMessage = error.message;
         }
