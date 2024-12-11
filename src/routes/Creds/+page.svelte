@@ -3,6 +3,10 @@
     import { page } from "$app/stores";
     import { fade, fly } from "svelte/transition";
     import { goto } from "$app/navigation";
+    import { initFirebase } from "$lib/client/firebase";
+    import { doc, updateDoc } from "firebase/firestore";
+    const {auth, db } = initFirebase();
+
     const googleAuthUrl = $page.data.authUrl;
 
     // Initialize isDark based on localStorage or system preference
@@ -27,6 +31,8 @@
         "/images/15.jpg"
     ];
 
+    let currentUser: any = null;
+    
     function toggleTheme() {
         isDark = !isDark;
         updateTheme(isDark);
@@ -66,11 +72,56 @@
             isLoaded = true;
         }, 100);
         intervalId = setInterval(switchImage, 5000);
+
+        // Subscribe to auth state
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            if (!user) {
+                goto('/login');
+            }
+        });
+
+        return () => {
+            unsubscribe();
+        }
     });
 
     onDestroy(() => {
         if (intervalId) clearInterval(intervalId);
     });
+
+    async function handleSubmit(event: Event) {
+        event.preventDefault();
+        
+        if (!currentUser) {
+            console.error('No user logged in');
+            return;
+        }
+
+        const formData = new FormData(event.target as HTMLFormElement);
+        const credentials = {
+            username: formData.get('username'),
+            age: Number(formData.get('age')),
+            gender: formData.get('gender'),
+            weight: Number(formData.get('weight')),
+            height: Number(formData.get('height')),
+            impedance: Number(formData.get('impedance')),
+            updatedAt: new Date()
+        };
+
+        try {
+            const userDocRef = doc(db, 'userdata', currentUser.email);
+            await updateDoc(userDocRef, {
+                cred: credentials
+            });
+            
+            // Redirect after successful update
+            goto('/');
+        } catch (error) {
+            console.error('Error updating credentials:', error);
+            // Handle error (you might want to show an error message to the user)
+        }
+    }
 </script>
 
 {#if isLoaded}
@@ -152,14 +203,14 @@
 
                 <div class="space-y-4" in:fly={{ y: 20, duration: 800, delay: 400 }}>
                     <!-- Social Logins -->
-                    <a href={googleAuthUrl}>
+                    <!-- <a href={googleAuthUrl}>
                         <button class="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 p-2.5 lg:p-3 rounded-lg transition-all duration-300 shadow-sm dark:bg-[#0E0E0C] dark:border dark:border-gray-600 dark:hover:bg-gray-700 dark:text-white text-sm lg:text-base">
                             <span class="flex items-center justify-center gap-3">
                                 <img src="/icons/google.svg" alt="Google" class="w-5 h-5 dark:invert" />
                                 Login with Google
                             </span>
                         </button>
-                    </a>
+                    </a> -->
 
                     <div class="relative py-2 lg:py-4">
                         <div class="absolute inset-0 flex items-center">
@@ -176,7 +227,10 @@
                     <!-- ... existing code ... -->
 
 <!-- Form -->
-<form class="space-y-4 lg:space-y-6" method="POST" action="?/submit">
+<form 
+    class="space-y-4 lg:space-y-6" 
+    on:submit|preventDefault={handleSubmit}
+>
     <div>
         <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Username

@@ -2,9 +2,11 @@
     import { onMount } from 'svelte';
     import { auth } from "../stores/auth";
     import { goto } from '$app/navigation';
+    import { initFirebase } from "$lib/client/firebase";
+    import { doc, getDoc } from "firebase/firestore";
     let isLoading = true;
     let username = '';
-  
+  const { db } = initFirebase();
     const handleLogout = async () => {
       try {
         await auth.signOut();
@@ -18,11 +20,27 @@
       setTimeout(() => {
         isLoading = false;
       }, 1000);
-      return auth.subscribe((user) => {
+      
+      return auth.subscribe(async (user) => {
         if (!user) {
           goto('/login');
         } else {
           username = user.displayName || user.email?.split('@')[0] || 'User';
+          
+          // Check user's document in Firestore
+          try {
+            const userDoc = await getDoc(doc(db, "userdata", user.email));
+            if (!userDoc.exists() || !userDoc.data().cred) {
+              goto('/creds');
+            } else {
+              // You can fetch and use the credentials data here
+              const userData = userDoc.data();
+              // TODO: Handle the user data as needed
+            }
+          } catch (error) {
+            console.error("Error checking user credentials:", error);
+            goto('/cred');
+          }
         }
       });
     });
