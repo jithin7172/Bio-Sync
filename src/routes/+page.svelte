@@ -7,6 +7,45 @@
     let isLoading = true;
     let username = '';
   const { db } = initFirebase();
+    let userData = {
+        bmi: 0,
+        bodyFatPercentage: 0,
+        ffm: 0,
+        tbw: 0,
+        bmr: 0
+    };
+
+    // Calculation functions
+    function calculateBMI(weight, height) {
+        return weight / (height * height);
+    }
+
+    function calculateBodyFatPercentageMale(weight, impedance) {
+        const bfMass = -10.463 + (0.671 * weight) - (0.184385 * impedance);
+        return (bfMass / weight) * 100;
+    }
+
+    function calculateBodyFatPercentageFemale(weight, impedance) {
+        const bfMass = -9.411 + (0.518 * weight) - (0.206987 * impedance);
+        return (bfMass / weight) * 100;
+    }
+
+    function calculateFFM(weight, bodyFatPercentage) {
+        return weight * (1 - (bodyFatPercentage / 100));
+    }
+
+    function calculateTBW(weight, height, impedance, gender) {
+        const factor = (gender === 'M') ? 0.155 : 0.245;
+        return (2.447 - (0.09156 * impedance) + (0.1074 * height)) * weight * factor;
+    }
+
+    function calculateBMR(weight, height, age, gender) {
+        if (gender === 'M') {
+            return (10 * weight) + (6.25 * height * 100) - (5 * age) + 5;
+        }
+        return (10 * weight) + (6.25 * height * 100) - (5 * age) - 161;
+    }
+
     const handleLogout = async () => {
       try {
         await auth.signOut();
@@ -27,15 +66,29 @@
         } else {
           username = user.displayName || user.email?.split('@')[0] || 'User';
           
-          // Check user's document in Firestore
           try {
             const userDoc = await getDoc(doc(db, "userdata", user.email));
             if (!userDoc.exists() || !userDoc.data().cred) {
               goto('/creds');
             } else {
-              // You can fetch and use the credentials data here
-              const userData = userDoc.data();
-              // TODO: Handle the user data as needed
+              const data = userDoc.data().cred;
+              
+              // Calculate all metrics
+              const height = parseFloat(data.height) / 100; // Convert to meters
+              const weight = parseFloat(data.weight);
+              const impedance = parseFloat(data.impedance);
+              const age = parseInt(data.age);
+              const gender = data.gender;
+
+              userData = {
+                bmi: calculateBMI(weight, height),
+                bodyFatPercentage: gender === 'M' 
+                    ? calculateBodyFatPercentageMale(weight, impedance)
+                    : calculateBodyFatPercentageFemale(weight, impedance),
+                ffm: calculateFFM(weight, userData.bodyFatPercentage),
+                tbw: calculateTBW(weight, height, impedance, gender),
+                bmr: calculateBMR(weight, height, age, gender)
+              };
             }
           } catch (error) {
             console.error("Error checking user credentials:", error);
@@ -46,9 +99,9 @@
     });
   
     const stats = [
-      { title: 'FFM', value: '55' },
-      { title: 'BMR', value: '1260.5' },
-      { title: 'TBW', value: '1260.5' }
+      { title: 'FFM', value: userData.ffm.toFixed(1) },
+      { title: 'BMR', value: userData.bmr.toFixed(1) },
+      { title: 'TBW', value: userData.tbw.toFixed(1) }
     ];
   </script>
 
@@ -90,15 +143,17 @@
           <!-- BMI Card -->
           <div class="bg-[#0a0f15] text-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow animate-slide-up animation-delay-400">
             <p class="text-xl opacity-90 mb-8 leading-relaxed">
-              Your current BMI is very good, and you seem to be having a healthy body
+              Your current BMI is {userData.bmi < 18.5 ? 'below normal' : userData.bmi < 25 ? 'very good' : userData.bmi < 30 ? 'above normal' : 'high'}
             </p>
-            <div class="text-6xl font-medium text-green-400">23.6</div>
+            <div class="text-6xl font-medium {userData.bmi < 25 ? 'text-green-400' : 'text-yellow-400'}">
+                {userData.bmi.toFixed(1)}
+            </div>
           </div>
 
           <!-- Fat Percentage Card -->
           <div class="bg-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow animate-slide-up animation-delay-500">
             <p class="text-xl text-gray-500 mb-4">Total Fat %</p>
-            <div class="text-6xl font-medium text-gray-900">16%</div>
+            <div class="text-6xl font-medium text-gray-900">{userData.bodyFatPercentage.toFixed(1)}%</div>
           </div>
 
           <!-- Stats Grid -->
