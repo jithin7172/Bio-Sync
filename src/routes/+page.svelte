@@ -136,7 +136,7 @@
       <div class="md:relative h-[70vh] flex flex-col md:flex-row gap-8">
         <div class="flex justify-center items-center w-full md:w-1/3 max-w-[500px] min-w-[200px] mx-auto animate-fade-in animation-delay-300">
           <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.48/build/spline-viewer.js"></script>
-          <spline-viewer width="100%" height="700" loading-anim-type="spinner-small-dark" url="https://prod.spline.design/ieC6db2R-ndItLa7/scene.splinecode"></spline-viewer>
+          <spline-viewer url="https://prod.spline.design/ieC6db2R-ndItLa7/scene.splinecode"></spline-viewer>
         </div>
 
         <main class="grid grid-cols-1 w-full md:grid-cols-2 lg:grid-cols-2 gap-8 flex-grow max-w-[1200px]">
