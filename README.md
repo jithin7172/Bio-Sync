@@ -95,11 +95,11 @@ Common deployment adapters:
 
 ## Contributing
 
-[Explain how others can contribute to the project]
+[The contributers can contibute in the development of this poroject]
 
 ## License
 
-[Specify your license]
+[partucularly no licence has been issued]
 
 ## Support
 
