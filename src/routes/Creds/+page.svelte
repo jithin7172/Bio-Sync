@@ -176,8 +176,12 @@
                                    Real-time monitoring
                                </span>
                                <div class="text-[40px] lg:text-[80px] text-white m-0 font-bold animate-pulse">
-                                   桜
-                               </div>
+                                <img 
+                                    src="/images/logo.png"  
+                                    alt="Logo" 
+                                    class="w-10 lg:w-20 h-auto mx-auto"
+                                />
+                                </div>
                                <span class="text-white/80 w-24 lg:w-56 text-lg lg:text-2xl hero-text text-left font-sh-grotesk">
                                    Personalized insights
                                </span>
@@ -274,7 +278,7 @@
             <option value="">Select gender</option>
             <option value="male">Male</option>
             <option value="female">Female</option>
-            <option value="other">Other</option>
+            <option value="other">Others</option>
         </select>
     </div>
 
